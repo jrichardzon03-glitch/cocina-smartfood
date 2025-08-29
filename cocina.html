@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartFood - Cocina</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a0033, #0f0047, #001f54, #320d6d);
+      color: #fff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    h1 {
+      color: #4cc9f0;
+      text-align: center;
+      text-shadow: 0 0 15px #9d4edd;
+    }
+    .pedido {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid #4cc9f0;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    .pedido h3 {
+      margin: 0 0 10px;
+      color: #9d4edd;
+    }
+  </style>
+</head>
+<body>
+  <h1>📢 Pedidos en tiempo real</h1>
+  <div id="listaPedidos"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getDatabase, ref, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-database.js";
+
+    // ✅ Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBIN95TuXzROeqe3SQfdMudboVwMSdkOBc",
+  authDomain: "smartfoodpedidos-ba35c.firebaseapp.com",
+  databaseURL: "https://smartfoodpedidos-ba35c-default-rtdb.firebaseio.com",
+  projectId: "smartfoodpedidos-ba35c",
+  storageBucket: "smartfoodpedidos-ba35c.firebasestorage.app",
+  messagingSenderId: "298863722110",
+  appId: "1:298863722110:web:176526a15799cd5ceae22f",
+  measurementId: "G-1JTSBQVHT7"
+    };
+
+    const appFirebase = initializeApp(firebaseConfig);
+    const db = getDatabase(appFirebase);
+
+    const listaPedidos = document.getElementById("listaPedidos");
+
+    // 👨‍🍳 Escuchar cada nuevo pedido en tiempo real
+    const pedidosRef = ref(db, "pedidos");
+    onChildAdded(pedidosRef, (snapshot) => {
+      const pedido = snapshot.val();
+
+      // Crear tarjeta para cada pedido
+      const div = document.createElement("div");
+      div.className = "pedido";
+      div.innerHTML = `
+        <h3>Pedido #${pedido.numero} - Cliente: ${pedido.nombre}</h3>
+        <p><b>Productos:</b></p>
+        <ul>
+          ${pedido.items.map(it => `<li>${it.nombre} x${it.cantidad} = S/${(it.precio*it.cantidad).toFixed(2)}</li>`).join("")}
+        </ul>
+        <p><b>Total:</b> S/${pedido.total.toFixed(2)}</p>
+      `;
+      listaPedidos.appendChild(div);
+    });
+  </script>
+</body>
+</html>
